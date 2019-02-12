@@ -1,30 +1,90 @@
-1. ls neg/*.jpg > neg.txt
-	¿ÉÒÔÊÇÏà¶ÔÂ·¾¶
-2. ls pos/*.jpg > pos.txt
-	½«pos.txtÖĞµÄ.jpg È«²¿Ìæ»»³É .jpg 1 0 0 24 24
+# eye_roi_detection---è™¹è†œROIæ£€æµ‹
+
+@(è™¹è†œè¯†åˆ«)[ç›®æ ‡jæ£€æµ‹]
+
+## å¼€å‘ç¯å¢ƒ
+Linuxã€OpenCVã€CMake
+
+## è®­ç»ƒæ­¥éª¤
+å‡è®¾æ­£æ ·æœ¬ä½äºimages/pos.30x30ï¼Œè´Ÿæ ·æœ¬ä½äºimages/negï¼Œæµ‹è¯•å›¾åƒä½äºimages/test
+
+### ç”Ÿæˆè´Ÿæ ·æœ¬æè¿°æ–‡ä»¶
+1-create_neg_desc_file.sh
+```
+image_dir_list=(
+"images/neg"
+)
+
+echo "create neg.txt"
+
+imagelist_file="neg.txt"
+rm -rf $imagelist_file
+touch $imagelist_file
+for image_dir in ${image_dir_list[*]}
+do
+	find $image_dir -name "*" | grep -i -E "bmp|jpg|png" >> $imagelist_file
+done
+
+echo "finish."
+```
 	
-3. Éú³ÉvecÎÄ¼ş
-	 opencv_createsamples -info pos.txt -vec pos.vec -bg neg.txt -num 2000 -w 24 -h 24
-	 ÆäÖĞ -num 2000 ±íÊ¾°üº¬2000Ñù±¾
+### ç”Ÿæˆæ­£æ ·æœ¬æè¿°æ–‡ä»¶
+2-create_pos_desc_file.sh
+```
+width=30
+height=30
+
+image_dir_list=(
+"images/pos.30x30"
+)
+
+echo "create pos.txt"
+
+imagelist_file="pos.txt"
+rm -rf $imagelist_file
+touch $imagelist_file
+for image_dir in ${image_dir_list[*]}
+do
+	for imagepath in `find $image_dir -name "*" | grep -i -E "bmp|jpg|png"`
+	do
+		echo $imagepath 1 0 0 $width $height >> pos.txt
+	done
+done
+
+echo "finish."
+```
+	
+### ç”Ÿæˆvecæ–‡ä»¶
+3-run.opencv_createsamples.sh
+```
+sample_num=20
+width=30
+height=30
+opencv_createsamples -info pos.txt -vec pos.vec -num $sample_num -w $width -h $height
+```
 	 
-4. ÑµÁ·
-opencv_traincascade -data xml -vec pos.vec -bg neg.txt -numPos 2000 -numNeg 4000 -numStages 20 -precalcValBufSize 2048 -precalcIdxBufSize 2048 -numThreads 8 -featureType LBP -w 24 -h 24
+### ç”¨opencv_traincascadeè®­ç»ƒæ¨¡å‹
+4-run.opencv_traincascade.LBP.sh
+```
+mkdir data_dir.lbp
+pos_num=18
+neg_num=54
+threads_num=4
+width=30
+height=30
+opencv_traincascade -data data_dir.lbp -vec pos.vec -bg neg.txt -numPos $pos_num -numNeg $neg_num -numStages 20 -precalcValBufSize 2048 -precalcIdxBufSize 2048 -numThreads $threads_num -featureType LBP -w $width -h $height
+```
 
-¿ÉÒÔÉèÖÃÏß³ÌÊı£¬mem
-     ÆäÊµÕâ¸öÑµÁ·¿ÉÒÔÖĞÍ¾Í£Ö¹µÄ£¬ÒòÎªÏÂ´Î¿ªÆôÊ±Ëü»á¶ÁÈ¡ÕâĞ©xmlÎÄ¼ş£¬½Ó×Å½øĞĞÉÏ´ÎÎ´Íê³ÉµÄÑµÁ·¡£
+å¯ä»¥è®¾ç½®çº¿ç¨‹æ•°ï¼Œmemã€‚è®­ç»ƒå¯ä»¥ä¸­é€”åœæ­¢çš„ï¼Œä¸‹æ¬¡å¼€å¯æ—¶å®ƒä¼šè¯»å–è®­ç»ƒè¿‡ç¨‹ä¸­ä¿å­˜çš„xmlæ–‡ä»¶ï¼Œæ¥ç€è¿›è¡Œä¸Šæ¬¡æœªå®Œæˆçš„è®­ç»ƒã€‚
 	 
-5. cascade.detectMultiScale(gray, objects, 1.1, 3, CASCADE_FIND_BIGGEST_OBJECT, Size(10, 10), Size(40, 40));
-         ĞèÒª¸ù¾İÊ¹ÓÃµÄÕıÑù±¾´óĞ¡£¬À´È·¶¨Size´óĞ¡¡£ 
-		 
+### æµ‹è¯•è®­ç»ƒçš„åˆ†ç±»å™¨
+cascade.detectMultiScale(gray, objects, 1.1, 3, CASCADE_FIND_BIGGEST_OBJECT, Size(10, 10), Size(40, 40));
+éœ€è¦æ ¹æ®ä½¿ç”¨çš„æ­£æ ·æœ¬å¤§å°ï¼Œæ¥ç¡®å®šSizeå¤§å°ã€‚ 		 
 
-		 
-6.²âÊÔ·ÖÀàÆ÷
-
-
-CMakeLists.txt
+**CMakeLists.txt**
 
 
-
+```
 cmake_minimum_required( VERSION 2.8 )
 
 project( test_cascade )
@@ -34,12 +94,13 @@ add_executable( ${PROJECT_NAME} main.cpp )
 find_package( OpenCV REQUIRED )
 
 target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} )
+```
 
 
+**main.cpp**
 
-main.cpp
 
-
+```
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
@@ -82,3 +143,4 @@ int main(int argc, char *argv[])
   }
   return 0;
 }
+```

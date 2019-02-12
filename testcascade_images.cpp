@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
     if(argc < 3)
     {
         printf("%s <cascade_file> <test_image_dir>\n", argv[0]);
+	return -1;
     }
     else
     {

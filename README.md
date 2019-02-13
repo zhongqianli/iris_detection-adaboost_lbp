@@ -1,4 +1,4 @@
-# eye_roi_detection---虹膜ROI检测
+# iris_detection---虹膜检测
 
 @(虹膜识别)[目标j检测]
 

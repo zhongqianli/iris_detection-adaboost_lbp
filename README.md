@@ -1,7 +1,5 @@
 # iris_detection---虹膜检测
 
-@(虹膜识别)[目标j检测]
-
 ## 开发环境
 Linux、OpenCV、CMake
 
